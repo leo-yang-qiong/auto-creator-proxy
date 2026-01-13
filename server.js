@@ -20,7 +20,7 @@ app.use('/api', createProxyMiddleware({
   onProxyReq: (proxyReq, req) => {
     // 添加固定的 cookie
     const existingCookie = proxyReq.getHeader('Cookie');
-    const newCookie = '_sd_token=5f1bbf82b09d45b39f5d0ab018cc33e4';
+    const newCookie = '_sd_token=9083b0867ecd4fb0a01113e92cafaf02';
 
     if (existingCookie) {
       proxyReq.setHeader('Cookie', `${existingCookie}; ${newCookie}`);
