@@ -18,20 +18,36 @@ app.use('/api', createProxyMiddleware({
   cookieDomainRewrite: '', // 移除 cookie 的 domain 限制
   selfHandleResponse: false, // 自己处理响应以便打印内容
   onProxyReq: (proxyReq, req) => {
-    // 添加固定的 cookie
-    const existingCookie = proxyReq.getHeader('Cookie');
-    const newCookie = '_sd_token=9083b0867ecd4fb0a01113e92cafaf02';
+    // // 添加固定的 cookie
+    // const existingCookie = proxyReq.getHeader('Cookie');
+    // const newCookie = '_sd_token=9083b0867ecd4fb0a01113e92cafaf02';
 
-    if (existingCookie) {
-      proxyReq.setHeader('Cookie', `${existingCookie}; ${newCookie}`);
-    } else {
-      proxyReq.setHeader('Cookie', newCookie);
-    }
+    // if (existingCookie) {
+    //   proxyReq.setHeader('Cookie', `${existingCookie}; ${newCookie}`);
+    // } else {
+    //   proxyReq.setHeader('Cookie', newCookie);
+    // }
 
     console.log(`[代理请求] ${req.method} ${req.url} -> ${proxyReq.path}`);
   },
   onProxyRes: (proxyRes, req, res) => {
     console.log(`[代理响应] ${proxyRes.statusCode} ${req.url}`);
+
+    // 处理 set-cookie 头，修改 _sd_token 的域名
+    const setCookie = proxyRes.headers['set-cookie'];
+    if (setCookie) {
+      proxyRes.headers['set-cookie'] = setCookie.map(cookie => {
+        if (cookie.includes('_sd_token')) {
+          // 移除原有的 Domain 设置（如果有）
+          let modifiedCookie = cookie.replace(/;\s*Domain=[^;]+/gi, '');
+          // 添加新的 Domain 设置
+          modifiedCookie += '; Domain=.kaloboost.com';
+          console.log(`[Cookie 修改] _sd_token 域名已修改为 .kaloboost.com`);
+          return modifiedCookie;
+        }
+        return cookie;
+      });
+    }
   },
   onError: (err, req, res) => {
     console.error('[代理错误]', err);

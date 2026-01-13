@@ -18,15 +18,15 @@ app.use('/api', createProxyMiddleware({
   cookieDomainRewrite: '', // 移除 cookie 的 domain 限制
   selfHandleResponse: false, // 自己处理响应以便打印内容
   onProxyReq: (proxyReq, req) => {
-    // 添加固定的 cookie
-    const existingCookie = proxyReq.getHeader('Cookie');
-    const newCookie = '_sd_token=9083b0867ecd4fb0a01113e92cafaf02';
+    // // 添加固定的 cookie
+    // const existingCookie = proxyReq.getHeader('Cookie');
+    // const newCookie = '_sd_token=9083b0867ecd4fb0a01113e92cafaf02';
 
-    if (existingCookie) {
-      proxyReq.setHeader('Cookie', `${existingCookie}; ${newCookie}`);
-    } else {
-      proxyReq.setHeader('Cookie', newCookie);
-    }
+    // if (existingCookie) {
+    //   proxyReq.setHeader('Cookie', `${existingCookie}; ${newCookie}`);
+    // } else {
+    //   proxyReq.setHeader('Cookie', newCookie);
+    // }
 
     console.log(`[代理请求] ${req.method} ${req.url} -> ${proxyReq.path}`);
   },
