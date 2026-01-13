@@ -15,7 +15,9 @@ app.use(cors());
 app.use('/api', createProxyMiddleware({
   target: process.env.TARGET_API_URL || 'https://app-api.autochuang.com',
   changeOrigin: true,
-  cookieDomainRewrite: '', // 移除 cookie 的 domain 限制
+  cookieDomainRewrite: {
+    '*': '.kaloboost.com' // 将所有域名的 cookie 重写为 .kaloboost.com
+  },
   selfHandleResponse: false, // 自己处理响应以便打印内容
   onProxyReq: (proxyReq, req) => {
     // // 添加固定的 cookie
@@ -30,23 +32,28 @@ app.use('/api', createProxyMiddleware({
 
     console.log(`[代理请求] ${req.method} ${req.url} -> ${proxyReq.path}`);
   },
-  onProxyRes: (proxyRes, req, res) => {
-    console.log(`[代理响应] ${proxyRes.statusCode} ${req.url}`);
+  onProxyRes: (proxyRes) => {
+    console.log(`[代理响应] ${proxyRes.statusCode}`);
 
-    // 处理 set-cookie 头，修改 _sd_token 的域名
+    // 打印 set-cookie 头信息用于调试
     const setCookie = proxyRes.headers['set-cookie'];
     if (setCookie) {
+      console.log('[原始 Set-Cookie]:', setCookie);
+
       proxyRes.headers['set-cookie'] = setCookie.map(cookie => {
         if (cookie.includes('_sd_token')) {
+          console.log('[_sd_token 原始]:', cookie);
           // 移除原有的 Domain 设置（如果有）
           let modifiedCookie = cookie.replace(/;\s*Domain=[^;]+/gi, '');
           // 添加新的 Domain 设置
           modifiedCookie += '; Domain=.kaloboost.com';
-          console.log(`[Cookie 修改] _sd_token 域名已修改为 .kaloboost.com`);
+          console.log('[_sd_token 修改后]:', modifiedCookie);
           return modifiedCookie;
         }
         return cookie;
       });
+
+      console.log('[最终 Set-Cookie]:', proxyRes.headers['set-cookie']);
     }
   },
   onError: (err, req, res) => {
