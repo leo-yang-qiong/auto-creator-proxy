@@ -1,7 +1,10 @@
 module.exports = {
   apps: [
     {
-      script: "server.js",
+      script: "app.js",
+    },
+    {
+      script: "login.js",
     },
   ],
 };
